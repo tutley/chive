@@ -1,21 +1,20 @@
-package main
+package models
 
 import (
-	"time"
-
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
-type example struct {
-	id    bson.ObjectID `bson:"_id" json:"id"`
-	title string        `bson:"title" json:"title"`
-	body  string        `bson:"body" json:"body"`
+// Example is the example object
+type Example struct {
+	ID    bson.ObjectId `bson:"_id" json:"id"`
+	Title string        `bson:"title" json:"title"`
+	Body  string        `bson:"body" json:"body"`
 }
 
-// find searches for an example based on its id
-func findExample(string title, db *mgo.Database) (*example, error) {
-	ex := example{}
+// FindExample searches for an example based on its id
+func FindExample(title string, db *mgo.Database) (*Example, error) {
+	ex := Example{}
 	err := db.C("examples").Find(bson.M{"title": title}).One(&ex)
 	if err != nil {
 		return nil, err
@@ -23,9 +22,9 @@ func findExample(string title, db *mgo.Database) (*example, error) {
 	return &ex, nil
 }
 
-// list shows all examples in the database
-func listExamples(db *mgo.Database) (*[]example, error) {
-	var exs []example
+// ListExamples shows all examples in the database
+func ListExamples(db *mgo.Database) (*[]Example, error) {
+	var exs []Example
 	err := db.C("examples").Find(bson.M{}).All(&exs)
 	if err != nil {
 		return nil, err
@@ -33,10 +32,10 @@ func listExamples(db *mgo.Database) (*[]example, error) {
 	return &exs, nil
 }
 
-// update is a method on example that updates the copy in the db
-func (e example) update(db *mgo.Database) error {
-	q := bson.M{"_id": e.id}
-	up := bson.M{"$set": bson.M{"title": e.title, "body": e.body}}
+// Update is a method on example that updates the copy in the db
+func (e Example) Update(db *mgo.Database) error {
+	q := bson.M{"_id": e.ID}
+	up := bson.M{"$set": bson.M{"title": e.Title, "body": e.Body}}
 	err := db.C("examples").Update(q, up)
 	return err
 }

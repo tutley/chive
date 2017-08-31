@@ -6,5 +6,4 @@ client/index_bundle.js
 client/index.html
 glide.lock
 .idea/
-get_jsfile_to_phantom
-post_jsfile_to_phantom
+

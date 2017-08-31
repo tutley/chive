@@ -1,0 +1,10 @@
+package: github.com/tutley/chive
+import:
+- package: github.com/GeertJohan/go.rice
+- package: github.com/go-chi/chi
+  version: ^3.2.0
+  subpackages:
+  - middleware
+- package: gopkg.in/mgo.v2
+  subpackages:
+  - bson

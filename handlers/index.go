@@ -1,32 +1,40 @@
-package main
+package handlers
 
 import (
-	"encoding/json"
-	"html/template"
-	//"github.com/davecgh/go-spew/spew"
+	"github.com/GeertJohan/go.rice"
 	"github.com/go-chi/chi"
-	"log"
+	//"log"
 	"net/http"
-	"strings"
-	"time"
+	//	"github.com/go-chi/chi/middleware"
+	"gopkg.in/mgo.v2"
 )
 
-// use go.rice to import the templates
-var templates *template.Template
+// Index serves as the anchor for all the handlers based on top-level routes
+type Index struct {
+	RespFormat  string
+	TemplateBox *rice.Box
+	Db          *mgo.Database
+}
 
-// PrettyTime is used in the html template to make the time pretty
-// func PrettyTime(t time.Time) string {
-// 	pt := t.Format("01/02/2006 3:04 PM MST")
-// 	return pt
-// }
+// Routes creates a REST router for the index resource
+func (rs Index) Routes() chi.Router {
+	r := chi.NewRouter()
+	// r.Use() // some middleware..
+	//r.Use(middleware.WithValue("respFormat", rs.RespFormat))
 
-// GetIndexHandler grabs the home page
-func getIndexHandler(w http.ResponseWriter, r *http.Request) {
-	c := struct{}{Title: "chive", Author: "Tom Utley"}
+	r.Get("/", rs.Home) // GET /
 
+	return r
+}
+
+// Home grabs the home page
+func (rs Index) Home(w http.ResponseWriter, r *http.Request) {
+	//	c := struct{}{Title: "chive", Author: "Tom Utley"}
+
+	w.Write([]byte("HOME PAGE"))
 	// This has to change to use the templates from rice
-	err := templates.ExecuteTemplate(w, "index", c)
-	if err != nil {
-		log.Println(err)
-	}
+	//	err := templates.ExecuteTemplate(w, "index", c)
+	//	if err != nil {
+	//		log.Println(err)
+	//	}
 }

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"context"
+	//"context"
 	"flag"
 	"github.com/GeertJohan/go.rice"
 	"github.com/go-chi/chi"
@@ -10,18 +10,11 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
-	"time"
+
+	// BE sure to change these for each new project
+	"github.com/tutley/chive/handlers"
+	//"github.com/tutley/chive/models"
 )
-
-type key int
-
-var dbKey key = 100000
-
-// getDb grabs the mgo database from the context
-func getDb(ctx context.Context) *mgo.Database {
-	return ctx.Value(dbKey).(*mgo.Database)
-}
 
 func main() {
 
@@ -44,22 +37,18 @@ func main() {
 	dbName := "chive"
 
 	// Init the Database
-	mongoMiddleware := func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// setup the mgo connection
-			session, err := mgo.Dial("mongodb://" + dbURL)
+	session, err := mgo.Dial("mongodb://" + dbURL)
+	if err != nil {
+		log.Fatal("DB Connect error: ", err)
+	}
 
-			if err != nil {
-				log.Println("DB Connect error: ", err)
-				http.Error(w, "Unable to connect to database", 500)
-			}
+	defer session.Close()
+	db := session.DB(dbName)
 
-			reqSession := session.Clone()
-			defer reqSession.Close()
-			db := reqSession.DB(dbName)
-			ctx := context.WithValue(r.Context(), helpers.DbKey, db)
-			next.ServeHTTP(w, r.WithContext(ctx))
-		})
+	// init the templates
+	templateBox, err := rice.FindBox("chive-templates")
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	r := chi.NewRouter()
@@ -70,25 +59,33 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	// Mount database
-	r.Use(mongoMiddleware)
-
 	// Setup routes
-	r.Get("/", getIndexHandler)
+
+	r.Mount("/", handlers.Index{
+		RespFormat:  "template",
+		TemplateBox: templateBox,
+		Db:          db}.Routes())
 
 	// Rather than doing server-side rendering, we are using templates to populate
 	// all of the meta tags in the header of the web pages, so that if a scraper or
 	// a search engine tries to access a link, they will get all of the page information
 	// even if they can't execute javascript. So in this routing section, we duplicate
 	// all of the routes but use the same underlying router to handle them.
-	r.Mount("/examples", exampleRoutes("template"))
+
+	r.Mount("/examples", handlers.Examples{
+		RespFormat:  "template",
+		TemplateBox: templateBox,
+		Db:          db}.Routes())
 
 	r.Route("/api", func(r chi.Router) {
-		r.Mount("/examples", exampleRoutes("json"))
+		r.Mount("/examples", handlers.Examples{
+			RespFormat:  "json",
+			TemplateBox: templateBox,
+			Db:          db}.Routes())
 	})
 
 	// This serves the static files
-	//fileServer(r, "/dist", assetFS())
+	r.Mount("/dist", http.FileServer(rice.MustFindBox("chive-dist").HTTPBox()))
 
 	serveAddr := ":" + strconv.Itoa(serverPort)
 	log.Println("dhcpportal Server listening on: ", strconv.Itoa(serverPort))
@@ -96,44 +93,4 @@ func main() {
 	// TODO: convert to HTTPS
 	// For publishing, get a cert with LetsEncrypt
 	// https://golang.org/pkg/net/http/#ListenAndServeTLS
-}
-
-// exampleRoutes is the router for example objects
-func exampleRoutes(string respFormat) chi.Router {
-	r := chi.NewRouter()
-	rf := "json"
-	rf = respFormat
-	r.Use(middleware.WithValue("respFormat", rf))
-	// TODO: add JWT authentication checking
-
-	r.Get("/", getExampleList)  // GET /examples
-	r.Post("/", postNewExample) // POST /examples
-
-	r.Route("/{id}", func(r chi.Router) {
-		r.Get("/", getExample)       // GET /examples/{id}
-		r.Put("/", putExample)       // PUT /examples/{id}
-		r.Delete("/", deleteExample) // DELETE /examples/{id}
-	})
-
-	return r
-}
-
-// fileServer conveniently sets up a http.FileServer handler to serve
-// static files from a http.FileSystem.
-func fileServer(r chi.Router, path string, root http.FileSystem) {
-	if strings.ContainsAny(path, "{}*") {
-		panic("FileServer does not permit URL parameters.")
-	}
-
-	fs := http.StripPrefix(path, http.FileServer(root))
-
-	if path != "/" && path[len(path)-1] != '/' {
-		r.Get(path, http.RedirectHandler(path+"/", 301).ServeHTTP)
-		path += "/"
-	}
-	path += "*"
-
-	r.Get(path, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fs.ServeHTTP(w, r)
-	}))
 }

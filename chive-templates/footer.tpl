@@ -1,16 +1,1 @@
-{{define "footer"}}
-
-
-<div class="container-fluid">
-  <hr>
-  <footer>
-    <p>&copy; 2017</p>
-  </footer>
-</div>
-
-</body>
-</html>
-
-
-
-{{end}}
+{{define "footer"}}<link rel=preload href=/dist/static/js/app.2313f02aecf4a9ee8924.js as=script><link rel=preload href=/dist/static/css/app.1d063bc0cd301699760e884e1e4c3379.css as=style><link rel=preload href=/dist/static/js/vendor.ae75c6b5bea60f5d8cec.js as=script><link rel=preload href=/dist/static/js/manifest.245caee8a45717ac5c31.js as=script><link href=/dist/static/css/app.1d063bc0cd301699760e884e1e4c3379.css rel=stylesheet><body><noscript>This is your fallback content in case JavaScript fails to load.</noscript><div id=app></div><script>!function(){"use strict";const o=Boolean("localhost"===window.location.hostname||"[::1]"===window.location.hostname||window.location.hostname.match(/^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/));window.addEventListener("load",function(){"serviceWorker"in navigator&&("https:"===window.location.protocol||o)&&navigator.serviceWorker.register("service-worker.js").then(function(o){o.onupdatefound=function(){if(navigator.serviceWorker.controller){const n=o.installing;n.onstatechange=function(){switch(n.state){case"installed":break;case"redundant":throw new Error("The installing service worker became redundant.")}}}}}).catch(function(o){console.error("Error during service worker registration:",o)})})}();</script><script type=text/javascript src=/dist/static/js/manifest.245caee8a45717ac5c31.js></script><script type=text/javascript src=/dist/static/js/vendor.ae75c6b5bea60f5d8cec.js></script><script type=text/javascript src=/dist/static/js/app.2313f02aecf4a9ee8924.js></script></body>{{end}}

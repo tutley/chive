@@ -1,20 +1,15 @@
 <template>
   <div class="hello">
+          <img src="../assets/logo.png" alt="Chive">
     <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="http://chat.vuejs.org/" target="_blank" rel="noopener">Vue Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="http://vuejs-templates.github.io/webpack/" target="_blank" rel="noopener">Docs for This Template</a></li>
-    </ul>
+    <p>Chive is a boilerplate for full-stack web development using Go, Chi, MongoDB, and Vue. When this project is built for deployment, everything is wrapped up into a single binary file.</p>
+    <p><a href="https://github.com/tutley/chive" target="_blank" rel="noopener">Github</a></p>
     <h2>Ecosystem</h2>
     <ul>
-      <li><a href="http://router.vuejs.org/" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="http://vuex.vuejs.org/" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="http://vue-loader.vuejs.org/" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
+      <li><a href="https://github.com/go-chi/chi" target="_blank" rel="noopener">Chi</a></li>
+      <li><a href="https://golang.org" target="_blank" rel="noopener">Go</a></li>
+      <li><a href="https://www.mongodb.com" target="_blank" rel="noopener">MongoDB</a></li>
+      <li><a href="http://vuejs.org/" target="_blank" rel="noopener">Vue</a></li>
     </ul>
   </div>
 </template>
@@ -24,7 +19,7 @@ export default {
   name: 'hello',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js PWA'
+      msg: 'Welcome to Chive'
     }
   }
 }

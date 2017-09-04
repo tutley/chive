@@ -85,7 +85,9 @@ func main() {
 	})
 
 	// This serves the static files
-	r.Mount("/dist", http.FileServer(rice.MustFindBox("chive-dist").HTTPBox()))
+	box := rice.MustFindBox("chive-dist")
+	distFileServer := http.StripPrefix("/dist/", http.FileServer(box.HTTPBox()))
+	r.Mount("/dist/", distFileServer)
 
 	serveAddr := ":" + strconv.Itoa(serverPort)
 	log.Println("dhcpportal Server listening on: ", strconv.Itoa(serverPort))

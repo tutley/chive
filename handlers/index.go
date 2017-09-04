@@ -3,10 +3,12 @@ package handlers
 import (
 	"github.com/GeertJohan/go.rice"
 	"github.com/go-chi/chi"
-	//"log"
+	"html/template"
+	"log"
 	"net/http"
 	//	"github.com/go-chi/chi/middleware"
 	"gopkg.in/mgo.v2"
+	"os"
 )
 
 // Index serves as the anchor for all the handlers based on top-level routes
@@ -29,12 +31,31 @@ func (rs Index) Routes() chi.Router {
 
 // Home grabs the home page
 func (rs Index) Home(w http.ResponseWriter, r *http.Request) {
-	//	c := struct{}{Title: "chive", Author: "Tom Utley"}
+	c := struct {
+		Title  string
+		Author string
+	}{
+		Title:  "Chive",
+		Author: "Tom Utley",
+	}
 
-	w.Write([]byte("HOME PAGE"))
-	// This has to change to use the templates from rice
-	//	err := templates.ExecuteTemplate(w, "index", c)
-	//	if err != nil {
-	//		log.Println(err)
-	//	}
+	// get file contents as string
+	indexString, err := rs.TemplateBox.String("index.tpl")
+	headerString, err := rs.TemplateBox.String("header.tpl")
+	footerString, err := rs.TemplateBox.String("footer.tpl")
+
+	// parse and execute the template
+	tmpl, err := template.New("index").Parse(headerString)
+	tmpl2, err := template.Must(tmpl.Clone()).Parse(footerString)
+	tmpl3, err := template.Must(tmpl2.Clone()).Parse(indexString)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = tmpl3.ExecuteTemplate(os.Stdout, "index", c)
+	err = tmpl3.ExecuteTemplate(w, "index", c)
+	if err != nil {
+		log.Println(err)
+	}
+
 }

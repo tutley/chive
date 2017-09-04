@@ -8,7 +8,6 @@ import (
 	"net/http"
 	//	"github.com/go-chi/chi/middleware"
 	"gopkg.in/mgo.v2"
-	"os"
 )
 
 // Index serves as the anchor for all the handlers based on top-level routes
@@ -32,11 +31,9 @@ func (rs Index) Routes() chi.Router {
 // Home grabs the home page
 func (rs Index) Home(w http.ResponseWriter, r *http.Request) {
 	c := struct {
-		Title  string
-		Author string
+		Title string
 	}{
-		Title:  "Chive",
-		Author: "Tom Utley",
+		Title: "Chive",
 	}
 
 	// get file contents as string
@@ -52,9 +49,9 @@ func (rs Index) Home(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	err = tmpl3.ExecuteTemplate(os.Stdout, "index", c)
 	err = tmpl3.ExecuteTemplate(w, "index", c)
 	if err != nil {
+		// TODO: return an HTTP ERROR internal server error
 		log.Println(err)
 	}
 

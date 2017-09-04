@@ -14,7 +14,7 @@
       </div>
     </div>
     <div class="mdl-cell mdl-cell--3-col"></div>
-    <router-link class="add-example-button mdl-button mdl-js-button mdl-button--fab mdl-button--colored" to="/example/post">
+    <router-link class="add-example-button mdl-button mdl-js-button mdl-button--fab mdl-button--colored" to="/examples/post">
       <i class="material-icons">add</i>
     </router-link>
   </div>
@@ -25,7 +25,6 @@
   export default {
     methods: {
       displayDetails (_id) {
-        console.log('id: ', _id)
         this.$router.push({name: 'Example Detail', params: { _id: _id }})
       }
     },

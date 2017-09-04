@@ -1,6 +1,7 @@
 package models
 
 import (
+	//"github.com/davecgh/go-spew/spew"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -13,9 +14,10 @@ type Example struct {
 }
 
 // FindExample searches for an example based on its id
-func FindExample(title string, db *mgo.Database) (*Example, error) {
+func FindExample(id string, db *mgo.Database) (*Example, error) {
 	ex := Example{}
-	err := db.C("examples").Find(bson.M{"title": title}).One(&ex)
+	bid := bson.ObjectIdHex(id)
+	err := db.C("examples").Find(bson.M{"_id": bid}).One(&ex)
 	if err != nil {
 		return nil, err
 	}
@@ -34,8 +36,18 @@ func ListExamples(db *mgo.Database) (*[]Example, error) {
 
 // Update is a method on example that updates the copy in the db
 func (e Example) Update(db *mgo.Database) error {
-	q := bson.M{"_id": e.ID}
-	up := bson.M{"$set": bson.M{"title": e.Title, "body": e.Body}}
-	err := db.C("examples").Update(q, up)
+	err := db.C("examples").UpdateId(e.ID, e)
+	return err
+}
+
+// Insert is a method on example that inserts a new example into the db
+func (e Example) Insert(db *mgo.Database) error {
+	err := db.C("examples").Insert(e)
+	return err
+}
+
+// Delete is a method on example that will delete the example
+func (e Example) Delete(db *mgo.Database) error {
+	err := db.C("examples").RemoveId(e.ID)
 	return err
 }

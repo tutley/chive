@@ -9,8 +9,8 @@
       <span class="mdl-layout-title">Chive</span>
       <nav class="mdl-navigation">
         <router-link class="mdl-navigation__link" to="/" @click.native="hideMenu">Home</router-link>
-        <router-link class="mdl-navigation__link" to="/example" @click.native="hideMenu">List Examples</router-link>
-        <router-link class="mdl-navigation__link" to="/example/post" @click.native="hideMenu">Post an Example</router-link>
+        <router-link class="mdl-navigation__link" to="/examples" @click.native="hideMenu">List Examples</router-link>
+        <router-link class="mdl-navigation__link" to="/examples/post" @click.native="hideMenu">Post an Example</router-link>
       </nav>
     </div>
     <main class="mdl-layout__content">

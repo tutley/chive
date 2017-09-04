@@ -16,17 +16,17 @@ export default new Router({
       component: Hello
     },
     {
-      path: '/example',
+      path: '/examples',
       name: 'Example List',
       component: ExampleList
     },
     {
-      path: '/example/:_id',
+      path: '/examples/:_id',
       name: 'Example Detail',
       component: ExampleDetail
     },
     {
-      path: '/example/post',
+      path: '/examples/post',
       name: 'Example Post',
       component: ExamplePost
     }

@@ -3,10 +3,10 @@
     <div class="mdl-cell mdl-cell--8-col">
      <div class="demo-card-wide mdl-card mdl-shadow--2dp">
         <div class="mdl-card__title">
-          <h2 class="mdl-card__title-text">{{ this.examples[$route.params._id].title }}</h2>
+          <h2 class="mdl-card__title-text">{{ this.example.title }}</h2>
         </div>
         <div class="mdl-card__supporting-text">
-          {{ this.examples[$route.params._id].body }}
+          {{ this.example.body }}
         </div>
         <div class="mdl-card__actions mdl-card--border">
           <router-link class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" to="/post">
@@ -25,14 +25,23 @@
 </template>
 
 <script>
-import data from '../../data'
-export default {
-  data () {
-    return {
-      'examples': data.examples
+  import {HTTP} from '../../api'
+
+  export default {
+    data: () => ({
+      example: [],
+      errors: []
+    }),
+    created () {
+      HTTP.get('examples/' + this.$route.params.id)
+      .then(response => {
+        this.example = response.data
+      })
+      .catch(e => {
+        this.errors.push(e)
+      })
     }
   }
-}
 </script>
 <style scoped>
 .demo-card-wide.mdl-card {

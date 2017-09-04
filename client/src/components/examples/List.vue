@@ -5,7 +5,7 @@
       <div class="demo-list-action mdl-list">
         <div v-for="example in this.examples"
           class="mdl-list__item"
-          @click="displayDetails(example._id)">
+          @click="displayDetails(example.id)">
           <span class="mdl-list__item-primary-content">
             <i class="material-icons mdl-list__item-avatar">person</i>
                 <span>{{ example.title }}</span>
@@ -21,17 +21,26 @@
 </template>
 
 <script>
-  import data from '../../data'
+  import {HTTP} from '../../api'
+
   export default {
     methods: {
-      displayDetails (_id) {
-        this.$router.push({name: 'Example Detail', params: { _id: _id }})
+      displayDetails (id) {
+        this.$router.push({name: 'Example Detail', params: { id: id }})
       }
     },
-    data () {
-      return {
-        'examples': data.examples
-      }
+    data: () => ({
+      examples: [],
+      errors: []
+    }),
+    created () {
+      HTTP.get('examples')
+      .then(response => {
+        this.examples = response.data
+      })
+      .catch(e => {
+        this.errors.push(e)
+      })
     }
   }
 </script>

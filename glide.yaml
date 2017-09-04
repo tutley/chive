@@ -8,3 +8,5 @@ import:
 - package: gopkg.in/mgo.v2
   subpackages:
   - bson
+- package: github.com/go-chi/cors
+  version: ^1.0.0

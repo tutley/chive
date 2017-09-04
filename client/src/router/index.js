@@ -21,7 +21,7 @@ export default new Router({
       component: ExampleList
     },
     {
-      path: '/examples/:_id',
+      path: '/examples/:id',
       name: 'Example Detail',
       component: ExampleDetail
     },

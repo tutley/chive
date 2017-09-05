@@ -21,14 +21,14 @@ export default new Router({
       component: ExampleList
     },
     {
-      path: '/examples/:id',
-      name: 'Example Detail',
-      component: ExampleDetail
-    },
-    {
       path: '/examples/post',
       name: 'Example Post',
       component: ExamplePost
+    },
+    {
+      path: '/examples/:id',
+      name: 'Example Detail',
+      component: ExampleDetail
     }
   ]
 })

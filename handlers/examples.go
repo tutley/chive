@@ -136,6 +136,11 @@ func (rs Examples) Get(w http.ResponseWriter, r *http.Request) {
 
 	// Grab example from DB
 	id := chi.URLParam(r, "id")
+	if id == "post" {
+		w.WriteHeader(204)
+		w.Write([]byte("\n"))
+		return
+	}
 	example, err := models.FindExample(id, rs.Db)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)

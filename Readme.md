@@ -33,5 +33,6 @@ Make sure to do things in this order. The fully built client will be incorported
 
 - Build the client by changing to the client directory and executing "npm run build"
 - In the project root directory, execute:
+    
     rice embed-go
     go build

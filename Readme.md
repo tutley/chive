@@ -2,7 +2,7 @@
 
 **_Status_**
 
-This runs but doens't have much implemented, just starting up the idea.
+This is up and running, but ugly. However, you do get full CRUD functionality out of the box.
 
 ---
 

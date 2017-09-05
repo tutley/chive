@@ -7,7 +7,7 @@
           class="mdl-list__item"
           @click="displayDetails(example.id)">
           <span class="mdl-list__item-primary-content">
-            <i class="material-icons mdl-list__item-avatar">person</i>
+            <i class="material-icons mdl-list__item-avatar">rowing</i>
                 <span>{{ example.title }}</span>
           </span>
         </div>

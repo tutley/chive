@@ -15,18 +15,38 @@
         </div>
         <div v-show="this.editable" class="mdl-textfield mdl-js-textfield">
           <textarea class="mdl-textfield__input" type="text" rows= "3" v-model="example.body" id="body" ></textarea>
-          <label class="mdl-textfield__label" for="body">Your Example Body...</label>
         </div>
         <div class="mdl-card__actions mdl-card--border">
-          <a v-show="!this.editable" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" @click.prevent="doEdit(example)">
-            EDIT
-          </a>
-          <a v-show="this.editable" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" @click.prevent="saveUpdate()">
-            SAVE
-          </a>
-          <a v-show="this.editable" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" @click.prevent="cancelEdit()">
-            CANCEL
+          <div v-show="!this.editable && !this.delete">
+            <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" @click.prevent="doEdit(example)">
+              EDIT
             </a>
+            <span class="fill-space">&nbsp;</span>
+            <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" @click.prevent="doDelete()">
+              DELETE
+            </a>
+          </div>
+          <div v-show="this.editable">
+            <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" @click.prevent="saveUpdate()">
+              SAVE
+            </a>
+            <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" @click.prevent="cancelEdit()">
+              CANCEL
+            </a>
+          </div>
+          <div v-show="this.delete">
+          <div>
+            <span class="mdl-chip mdl-chip--basic">
+              <span class="mdl-chip__text">Are you sure? Think of the children!</span>
+            </span>
+            </div>
+            <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" @click.prevent="sendDelete()">
+              DELETE
+            </a>
+            <a class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" @click.prevent="cancelDelete()">
+              CANCEL
+            </a>
+          </div>
         </div>
         </form>
       </div>
@@ -60,12 +80,28 @@
         .catch(e => {
           this.errors.push(e)
         })
+      },
+      doDelete: function () {
+        this.delete = true
+      },
+      cancelDelete: function () {
+        this.delete = false
+      },
+      sendDelete: function () {
+        HTTP.delete('examples/' + this.$route.params.id)
+        .then(response => {
+          this.$router.push({name: 'Example List'})
+        })
+        .catch(e => {
+          this.errors.push(e)
+        })
       }
     },
     data: () => ({
       example: {},
       errors: [],
       editable: false,
+      delete: false,
       _originalExample: {}
     }),
     created () {
@@ -80,6 +116,11 @@
   }
 </script>
 <style scoped>
+.fill-space {
+  // This fills the remaining space, by using flexbox.
+  // Every toolbar row uses a flexbox row layout.
+  flex: 1 1 auto;
+}
 .demo-card-wide.mdl-card {
   width: 512px;
 }

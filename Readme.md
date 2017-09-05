@@ -36,3 +36,5 @@ Make sure to do things in this order. The fully built client will be incorported
     
     rice embed-go
     go build
+
+    

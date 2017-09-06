@@ -10,6 +10,25 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
+type siteMetas struct {
+	SiteName        string
+	Title           string // Title of this asset
+	Description     string
+	ImageURL        string
+	URL             string
+	TwitterUsername string // including the @
+	Type            string // website or article
+}
+
+var metas = siteMetas{
+	SiteName:    "Chive",
+	Title:       "Welcome to Chive",
+	Description: "A full stack website boilerplate written in Go and Vue.",
+	ImageURL:    "https://i.imgur.com/PComu8U.jpg",
+	URL:         "http://localhost:3333/",
+	Type:        "website",
+}
+
 // Index serves as the anchor for all the handlers based on top-level routes
 type Index struct {
 	RespFormat  string
@@ -30,11 +49,6 @@ func (rs Index) Routes() chi.Router {
 
 // Home grabs the home page
 func (rs Index) Home(w http.ResponseWriter, r *http.Request) {
-	c := struct {
-		Title string
-	}{
-		Title: "Chive",
-	}
 
 	// get file contents as string
 	indexString, err := rs.TemplateBox.String("index.tpl")
@@ -49,7 +63,7 @@ func (rs Index) Home(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	err = tmpl3.ExecuteTemplate(w, "index", c)
+	err = tmpl3.ExecuteTemplate(w, "index", metas)
 	if err != nil {
 		// TODO: return an HTTP ERROR internal server error
 		log.Println(err)

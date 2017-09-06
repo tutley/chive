@@ -14,6 +14,9 @@ import (
 	"net/http"
 )
 
+// Remember to overwrite the metas for each template produciton where applicable
+// metas defined in index.go
+
 // Examples serves as the anchor for all the handlers based on examples routes
 type Examples struct {
 	RespFormat  string
@@ -79,12 +82,8 @@ func (rs Examples) List(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(js)
 	} else {
-		c := struct {
-			Title string
-		}{
-			Title: "Chive - List of Examples",
-		}
-		err := masterTpl.ExecuteTemplate(w, "index", c)
+		metas.Title = "Chive - List of Examples"
+		err := masterTpl.ExecuteTemplate(w, "index", metas)
 		if err != nil {
 			log.Println(err)
 		}
@@ -161,12 +160,10 @@ func (rs Examples) Get(w http.ResponseWriter, r *http.Request) {
 	} else {
 		var t string
 		t = example.Title + " - Chive"
-		c := struct {
-			Title string
-		}{
-			Title: t,
-		}
-		err := masterTpl.ExecuteTemplate(w, "index", c)
+		metas.Title = t
+		metas.Description = example.Body
+		metas.Type = "article"
+		err := masterTpl.ExecuteTemplate(w, "index", metas)
 		if err != nil {
 			log.Println(err)
 		}

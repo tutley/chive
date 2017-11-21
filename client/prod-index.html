@@ -1,21 +1,30 @@
 {{define "footer"}}
 
 
-    <% for (var chunk of webpack.chunks) {
+<% for (var chunk of webpack.chunks) {
         for (var file of chunk.files) {
           if (file.match(/\.(js|css)$/)) { %>
-    <link rel="<%= chunk.initial?'preload':'prefetch' %>" href="<%= htmlWebpackPlugin.files.publicPath + file %>" as="<%= file.match(/\.css$/)?'style':'script' %>"><% }}} %>
+  <link rel="<%= chunk.initial?'preload':'prefetch' %>" href="<%= htmlWebpackPlugin.files.publicPath + file %>" as="<%= file.match(/\.css$/)?'style':'script' %>">
+  <% }}} %>
 
-  </head>
-  <body>
-    <noscript>
-      This is your fallback content in case JavaScript fails to load.
-    </noscript>
-    <div id="app"></div>
-    <!-- Todo: only include in production -->
-    <%= htmlWebpackPlugin.options.serviceWorkerLoader %>
-    <!-- built files will be auto injected -->
-  </body>
-</html>
+    </head>
 
-{{end}}
+    <body>
+      <noscript>
+        This is your fallback content in case JavaScript fails to load.
+      </noscript>
+      <!-- This bit of silliness is for pwa completeness -->
+      <div id="pwaloader" class="loader">
+        <svg viewBox="0 0 32 32" width="32" height="32">
+          <circle id="spinner" cx="16" cy="16" r="14" fill="none"></circle>
+        </svg>
+      </div>
+      <div id="app"></div>
+      <!-- Todo: only include in production -->
+      <%= htmlWebpackPlugin.options.serviceWorkerLoader %>
+        <!-- built files will be auto injected -->
+    </body>
+
+    </html>
+
+    {{end}}

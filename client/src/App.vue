@@ -81,6 +81,11 @@ export default {
     jump(loc) {
       this.$router.push(loc)
     }
+  },
+  beforeMount() {
+    // This removes the spinner once the app is loaded
+    let pwadiv = document.getElementById('pwaloader')
+    pwadiv.remove()
   }
 }
 </script>

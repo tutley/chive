@@ -40,3 +40,16 @@ go build
 ```
 
 PS - make sure to set your GOOS and GOARCH environment variables accordingly for the target server
+
+
+Lastly, you can serve this site over TLS and http2 (including push) by setting up a caddy server and reverse-proxying to your app. Caddy does it all for you magically. https://caddyserver.com
+
+Here's an example caddyfile:
+```
+yourwebsite.com www.yourwebsite.com {
+  tls you@yourwebsite.com
+  push
+  proxy / http://localhost:6000
+  log foundirl.access.log
+}
+```

@@ -50,6 +50,6 @@ yourwebsite.com www.yourwebsite.com {
   tls you@yourwebsite.com
   push
   proxy / http://localhost:6000
-  log foundirl.access.log
+  log yourwebsite.access.log
 }
 ```

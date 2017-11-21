@@ -2,7 +2,9 @@
 
 **_Status_**
 
-This is up and running, but ugly. However, you do get full CRUD functionality out of the box.
+I have refactored this project to use vuetify and it looks pretty now!
+
+![Screenshot](https://i.imgur.com/51Tzimo.png)
 
 ---
 
@@ -39,3 +41,4 @@ rice embed-go
 go build
 ```
 
+PS - make sure to set your GOOS and GOARCH environment variables accordingly for the target server

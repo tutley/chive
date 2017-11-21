@@ -1,58 +1,78 @@
 <template>
-  <form>
-    <div class="mdl-grid">
-      <div class="mdl-cell mdl-cell--4-col mdl-cell--8-col-tablet">
-        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label is-upgraded is-dirty">
-          <input id="title" v-model="title" type="text" class="mdl-textfield__input"/>
-          <label for="title" class="mdl-textfield__label">Title</label>
-        </div>
-        <div class="mdl-textfield mdl-js-textfield">
-          <textarea class="mdl-textfield__input" type="text" rows= "3" v-model="body" id="body" ></textarea>
-          <label class="mdl-textfield__label" for="body">Your Example Body...</label>
-        </div>
-        <ul v-if="errors && errors.length">
-          <li v-for="error of errors">
-            <span>{{error.message}}</span>
-          </li>
-        </ul>
-        <div class="actions">
-          <a @click.prevent="postExample()" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
-            POST EXAMPLE
-          </a>
-        </div>
-      </div>
-    </div>
-  </form>
+  <v-container fluid>
+    <v-layout row>
+      <v-flex xs12 sm8 offset-sm2>
+        <v-form v-model="valid" ref="form" lazy-validation>
+          <v-text-field
+            label="Title"
+            v-model="title"
+            :rules="titleRules"
+            :counter="60"
+            required
+          ></v-text-field>
+          <v-text-field
+            label="Body"
+            v-model="body"
+            multi-line
+            :rules="bodyRules"
+            required
+          ></v-text-field>
+          <v-btn
+            @click="submit"
+            :disabled="!valid"
+          >
+            Submit
+          </v-btn>
+          <v-btn @click="clear">Clear</v-btn>
+        </v-form>
+        <v-progress-linear :indeterminate="true" v-show="sending"></v-progress-linear>
+        <v-alert color="error" v-show="errors.length > 0" icon="warning" value="true">
+          <p v-for="(error, i) in errors" :key="i">
+            {{ error.message }}
+          </p>
+        </v-alert>
+      </v-flex>
+    </v-layout>
+  </v-container>
 </template>
-<script>
-  import {HTTP} from '../../api'
 
-  export default {
-    methods: {
-      postExample () {
+<script>
+import { HTTP } from '../../api'
+
+export default {
+  data: () => ({
+    sending: false,
+    title: '',
+    titleRules: [
+      v => !!v || 'Title is required',
+      v => (v && v.length <= 60) || 'Title mus tbe less than 60 characters'
+    ],
+    body: '',
+    bodyRules: [v => !!v || 'Body is required'],
+    errors: [],
+    valid: true
+  }),
+  methods: {
+    submit() {
+      if (this.$refs.form.validate()) {
+        this.sending = true
         HTTP.post('examples', {
           title: this.title,
           body: this.body
         })
-        .then(response => {
-          this.$router.push({name: 'Example Detail', params: { id: response.data.id }})
-        })
-        .catch(e => {
-          this.errors.push(e)
-        })
+          .then(response => {
+            this.sending = false
+            this.$router.push({ name: 'Example Detail', params: { id: response.data.id } })
+          })
+          .catch(e => {
+            this.sending = false
+            this.errors.push(e)
+          })
       }
     },
-    data: () => ({
-      title: '',
-      body: '',
-      errors: []
-    })
-
+    clear() {
+      this.$refs.form.reset()
+    }
   }
+}
 </script>
-<style scoped>
-  .waiting {
-    padding: 10px;
-    color: #555;
-  }
-</style>

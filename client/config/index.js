@@ -3,12 +3,13 @@ var path = require('path')
 
 module.exports = {
   build: {
-    env: require('./prod.env'),
+    // env: require('./prod.env'),
     index: path.resolve(__dirname, '../../chive-templates/footer.tpl'),
     assetsRoot: path.resolve(__dirname, '../../chive-dist'),
     assetsSubDirectory: 'static',
-    assetsPublicPath: '/dist/',
+    assetsPublicPath: '/',
     productionSourceMap: true,
+    devTool: '#source-map',
     // Gzip off by default as many popular static hosts such as
     // Surge or Netlify already gzip all static assets for you.
     // Before setting to `true`, make sure to:
@@ -22,9 +23,17 @@ module.exports = {
     bundleAnalyzerReport: process.env.npm_config_report
   },
   dev: {
-    env: require('./dev.env'),
+    // env: require('./dev.env'),
+    host: 'localhost',
+    errorOverlay: true,
+    notifyOnErrors: true,
+    poll: false,
+    useEslint: true,
+    showEslintErrorsInOverlay: false,
+    detool: 'eval-source-map',
+    cacheBusting: true,
     port: 8080,
-    autoOpenBrowser: true,
+    autoOpenBrowser: false,
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {},

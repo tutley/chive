@@ -1,9 +1,20 @@
 import axios from 'axios'
 
-export const HTTP = axios.create({
-  // TODO: Find a way to have a dev vs production setting for this
-  baseURL: `http://localhost:3333/api/`
+// IF you use JWT Auth, this is how you would add the token to api requests
+// let isLoggedIn = localStorage.getItem('token') != null
+// let authString = ''
+
+// if (isLoggedIn) {
+//   authString = 'Bearer ' + localStorage.getItem('token')
+// }
+
+var apiURL = process.env.API_ROOT + '/api'
+
+const config = {
+  baseURL: apiURL
   // headers: {
-  //   Authorization: 'Bearer {token}'
+  //   ...(isLoggedIn ? {Authorization: authString} : {})
   // }
-})
+}
+
+export const HTTP = axios.create(config)

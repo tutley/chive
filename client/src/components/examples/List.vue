@@ -1,61 +1,60 @@
 <template>
-  <div class="mdl-grid">
-    <div class="mdl-cell mdl-cell--3-col"></div>
-    <div class="mdl-cell mdl-cell--6-col">
-      <div class="demo-list-action mdl-list">
-        <div v-for="example in this.examples"
-          class="mdl-list__item"
-          @click="displayDetails(example.id)">
-          <span class="mdl-list__item-primary-content">
-            <i class="material-icons mdl-list__item-avatar">rowing</i>
-                <span>{{ example.title }}</span>
-          </span>
-        </div>
-      </div>
-    </div>
-    <div class="mdl-cell mdl-cell--3-col"></div>
-    <router-link class="add-example-button mdl-button mdl-js-button mdl-button--fab mdl-button--colored" to="/examples/post">
-      <i class="material-icons">add</i>
-    </router-link>
-  </div>
+  <v-container fluid>
+    <v-layout row>
+      <v-flex xs12 sm6 offset-sm3>
+        <v-progress-linear :indeterminate="true" v-show="loading"></v-progress-linear>
+        <v-alert v-show="examples.length < 1 && !loading" color="info" icon="info" value="true">
+        No Examples yet...   (click that little green add button)
+        </v-alert>
+        <v-card v-show="errors.length < 1">
+          <v-list three-line>
+            <v-subheader>Examples</v-subheader>
+            <template v-for="(example, index) in examples">
+              <v-divider :key="index"></v-divider>
+              <v-list-tile v-bind:key="index" @click="displayDetails(example.id)">
+                <v-list-tile-content>
+                  <v-list-tile-title v-html="example.title"></v-list-tile-title>
+                  <v-list-tile-sub-title v-html="example.body"></v-list-tile-sub-title>
+                </v-list-tile-content>
+              </v-list-tile>
+            </template>
+          </v-list>
+        </v-card>
+        <v-alert color="error" v-show="errors.length > 0" icon="warning" value="true">
+          <p v-for="(error, i) in errors" :key="i">
+            {{ error.message }}
+          </p>
+        </v-alert>
+      </v-flex>
+    </v-layout>
+  </v-container>
 </template>
 
 <script>
-  import {HTTP} from '../../api'
+import { HTTP } from '../../api'
 
-  export default {
-    methods: {
-      displayDetails (id) {
-        this.$router.push({name: 'Example Detail', params: { id: id }})
-      }
-    },
-    data: () => ({
-      examples: [],
-      errors: []
-    }),
-    created () {
-      HTTP.get('examples')
+export default {
+  methods: {
+    displayDetails(id) {
+      this.$router.push({ name: 'Example Detail', params: { id: id } })
+    }
+  },
+  data: () => ({
+    examples: [],
+    errors: [],
+    loading: false
+  }),
+  created() {
+    this.loading = true
+    HTTP.get('examples')
       .then(response => {
         this.examples = response.data
+        this.loading = false
       })
       .catch(e => {
         this.errors.push(e)
+        this.loading = false
       })
-    }
   }
-</script>
-
-<style scoped>
-  .add-example-button {
-    position: fixed;
-    right: 24px;
-    bottom: 24px;
-    z-index: 998;
-  }
-
-.mdl-list__item:hover {
-  background-color: #eeeeee;
 }
-
-
-</style>
+</script>

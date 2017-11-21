@@ -2,16 +2,14 @@ package handlers
 
 import (
 	"encoding/json"
-	"errors"
-	"github.com/GeertJohan/go.rice"
+	"log"
+	"net/http"
+
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/tutley/chive/models"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"html/template"
-	"log"
-	"net/http"
 )
 
 // Remember to overwrite the metas for each template produciton where applicable
@@ -19,12 +17,9 @@ import (
 
 // Examples serves as the anchor for all the handlers based on examples routes
 type Examples struct {
-	RespFormat  string
-	TemplateBox *rice.Box
-	Db          *mgo.Database
+	RespFormat string
+	Db         *mgo.Database
 }
-
-var masterTpl *template.Template
 
 // Routes creates a REST router for the examples resource
 // /examples
@@ -32,7 +27,6 @@ func (rs Examples) Routes() chi.Router {
 	r := chi.NewRouter()
 	// r.Use() // some middleware..
 	r.Use(middleware.WithValue("respFormat", rs.RespFormat))
-	// TODO: add JWT authentication checking
 
 	r.Get("/", rs.List)    // GET /examples - read a list of examples
 	r.Post("/", rs.Create) // POST /examples - create a new example and persist it
@@ -42,22 +36,6 @@ func (rs Examples) Routes() chi.Router {
 		r.Put("/", rs.Update)    // PUT /examples/{id} - update a single example by :id
 		r.Delete("/", rs.Delete) // DELETE /examples/{id} - delete a single example by :id
 	})
-
-	// prepare templates
-	indexString, err := rs.TemplateBox.String("index.tpl")
-	headerString, err := rs.TemplateBox.String("header.tpl")
-	footerString, err := rs.TemplateBox.String("footer.tpl")
-
-	// parse and execute the template
-	tmpl, err := template.New("index").Parse(headerString)
-	tmpl2, err := template.Must(tmpl.Clone()).Parse(footerString)
-	tmpl3, err := template.Must(tmpl2.Clone()).Parse(indexString)
-	masterTpl = tmpl3
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	return r
 }
 
@@ -68,25 +46,24 @@ func (rs Examples) List(w http.ResponseWriter, r *http.Request) {
 	// Grab examples from DB
 	examples, err := models.ListExamples(rs.Db)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println("Error getting examples: ", err)
+		http.Error(w, "Error: Couldn't fetch the examples from the database", http.StatusInternalServerError)
 		return
 	}
 
 	// check the response format
 	if respFormat == "json" {
-		js, err := json.Marshal(examples)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		e := json.NewEncoder(w).Encode(&examples)
+		if e != nil {
+			log.Println("Error encoding json response: ", e)
+			http.Error(w, "Error: we got a bunch of gobbldygook from the database", http.StatusInternalServerError)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(js)
 	} else {
-		metas.Title = "Chive - List of Examples"
-		err := masterTpl.ExecuteTemplate(w, "index", metas)
-		if err != nil {
-			log.Println(err)
-		}
+		lmetas := genMetas()
+		lmetas.Title = "Chive - List of Examples"
+		sendTemplate(lmetas, w, r)
 	}
 }
 
@@ -97,8 +74,7 @@ func (rs Examples) Create(w http.ResponseWriter, r *http.Request) {
 	// check the response format
 	if respFormat != "json" {
 		// We don't allow creates from outside of json
-		err := errors.New("You can't do that.")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "You can't do that", http.StatusBadRequest)
 		return
 	}
 
@@ -108,7 +84,7 @@ func (rs Examples) Create(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&example)
 	if err != nil {
 		log.Println("error parsing json request ", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "There was an error with your submission message", http.StatusBadRequest)
 		return
 	}
 	example.ID = bson.NewObjectId()
@@ -116,17 +92,16 @@ func (rs Examples) Create(w http.ResponseWriter, r *http.Request) {
 	err = example.Insert(rs.Db)
 	if err != nil {
 		log.Println("error inserting example: ", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "The database crapped out when trying to save the example", http.StatusInternalServerError)
 		return
 	}
 
-	js, err := json.Marshal(example)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	w.Header().Set("Content-Type", "application/json")
+	e := json.NewEncoder(w).Encode(&example)
+	if e != nil {
+		http.Error(w, "The example was saved but we messed up with the return message", http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
 }
 
 // Get will get an example
@@ -149,26 +124,21 @@ func (rs Examples) Get(w http.ResponseWriter, r *http.Request) {
 
 	// check the response format
 	if respFormat == "json" {
-		js, err := json.Marshal(example)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			log.Println("Error encoding example into json: ", err)
+		w.Header().Set("Content-Type", "application/json")
+		e := json.NewEncoder(w).Encode(&example)
+		if e != nil {
+			http.Error(w, "The example was found but we messed up with the return message", http.StatusInternalServerError)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(js)
 	} else {
 		var t string
 		t = example.Title + " - Chive"
-		metas.Title = t
-		metas.Description = example.Body
-		metas.Type = "article"
-		err := masterTpl.ExecuteTemplate(w, "index", metas)
-		if err != nil {
-			log.Println(err)
-		}
+		gmetas := genMetas()
+		gmetas.Title = t
+		gmetas.Description = example.Body
+		gmetas.Type = "article"
+		sendTemplate(gmetas, w, r)
 	}
-
 }
 
 // Update will update an example
@@ -178,20 +148,18 @@ func (rs Examples) Update(w http.ResponseWriter, r *http.Request) {
 	// check the response format
 	if respFormat != "json" {
 		// We don't allow creates from outside of json
-		err := errors.New("You can't do that.")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "You can't do that", http.StatusBadRequest)
 		return
 	}
 
 	id := chi.URLParam(r, "id")
-
 	// go ahead and push it to the db and return success or error
 	example := models.Example{}
 
 	err := json.NewDecoder(r.Body).Decode(&example)
 	if err != nil {
 		log.Println("error parsing json request ", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "There was something wrong with the update message", http.StatusBadRequest)
 		return
 	}
 	example.ID = bson.ObjectIdHex(id)
@@ -199,7 +167,7 @@ func (rs Examples) Update(w http.ResponseWriter, r *http.Request) {
 	err = example.Update(rs.Db)
 	if err != nil {
 		log.Println("error update example: ", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "The database crapped out when we tried to update the example", http.StatusInternalServerError)
 		return
 	}
 
@@ -214,19 +182,16 @@ func (rs Examples) Delete(w http.ResponseWriter, r *http.Request) {
 	// check the response format
 	if respFormat != "json" {
 		// We don't allow creates from outside of json
-		err := errors.New("You can't do that.")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "You can't do that", http.StatusBadRequest)
 		return
 	}
 
 	id := chi.URLParam(r, "id")
-
 	example := models.Example{ID: bson.ObjectIdHex(id)}
-
 	e := example.Delete(rs.Db)
 	if e != nil {
 		log.Println("error deleting example: ", e)
-		http.Error(w, e.Error(), http.StatusInternalServerError)
+		http.Error(w, "We found the example but for some reason the delete crapped out", http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(204)

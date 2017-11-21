@@ -1,20 +1,19 @@
 package main
 
 import (
-	//"context"
 	"flag"
+	"log"
+	"net/http"
+	"strconv"
+
 	"github.com/GeertJohan/go.rice"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	"gopkg.in/mgo.v2"
-	"log"
-	"net/http"
-	"strconv"
 
 	// BE sure to change these for each new project
 	"github.com/tutley/chive/handlers"
-	//"github.com/tutley/chive/models"
 )
 
 func main() {
@@ -51,21 +50,19 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	handlers.SetTemplateBox(templateBox)
 
 	r := chi.NewRouter()
-
 	// Use Chi built-in middlewares
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-
+	r.Use(middleware.DefaultCompress)
 	// Setup routes
-
 	r.Mount("/", handlers.Index{
-		RespFormat:  "template",
-		TemplateBox: templateBox,
-		Db:          db}.Routes())
+		RespFormat: "template",
+		Db:         db}.Routes())
 
 	// Rather than doing server-side rendering, we are using templates to populate
 	// all of the meta tags in the header of the web pages, so that if a scraper or
@@ -74,9 +71,8 @@ func main() {
 	// all of the routes but use the same underlying router to handle them.
 
 	r.Mount("/examples", handlers.Examples{
-		RespFormat:  "template",
-		TemplateBox: templateBox,
-		Db:          db}.Routes())
+		RespFormat: "template",
+		Db:         db}.Routes())
 
 	r.Route("/api", func(r chi.Router) {
 
@@ -93,20 +89,33 @@ func main() {
 		})
 		r.Use(cors.Handler)
 		r.Mount("/examples", handlers.Examples{
-			RespFormat:  "json",
-			TemplateBox: templateBox,
-			Db:          db}.Routes())
+			RespFormat: "json",
+			Db:         db}.Routes())
 	})
 
 	// This serves the static files
+	// There is probably a better way to do this, but for now I'm manually serving the service worker files
 	box := rice.MustFindBox("chive-dist")
-	distFileServer := http.StripPrefix("/dist/", http.FileServer(box.HTTPBox()))
-	r.Mount("/dist/", distFileServer)
+	sw, _ := box.String("service-worker.js")
+	r.Get("/service-worker.js", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/javascript")
+		w.Write([]byte(sw))
+	})
+	wbjs, _ := box.String("workbox-sw.prod.v2.1.2.js")
+	r.Get("/workbox-sw.prod.v2.1.2.js", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/javascript")
+		w.Write([]byte(wbjs))
+	})
+	wbsm, _ := box.String("workbox-sw.prod.v2.1.2.js.map")
+	r.Get("/workbox-sw.prod.v2.1.2.js.map", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/javascript")
+		w.Write([]byte(wbsm))
+	})
+	// OK now mount the static folder from within foundirl-dist
+	distFileServer := http.StripPrefix("/", http.FileServer(box.HTTPBox()))
+	r.Mount("/static/", distFileServer)
 
 	serveAddr := ":" + strconv.Itoa(serverPort)
-	log.Println("dhcpportal Server listening on: ", strconv.Itoa(serverPort))
+	log.Println("chive Server listening on: ", strconv.Itoa(serverPort))
 	http.ListenAndServe(serveAddr, r)
-	// TODO: convert to HTTPS
-	// For publishing, get a cert with LetsEncrypt
-	// https://golang.org/pkg/net/http/#ListenAndServeTLS
 }

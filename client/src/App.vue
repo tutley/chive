@@ -1,41 +1,144 @@
 <template>
-  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header" id="app">
-    <header class="mdl-layout__header">
-      <div class="mdl-layout__header-row">
-        <span>Chive</span>
-      </div>
-    </header>
-    <div class="mdl-layout__drawer">
-      <span class="mdl-layout-title">Chive</span>
-      <nav class="mdl-navigation">
-        <router-link class="mdl-navigation__link" to="/" @click.native="hideMenu">Home</router-link>
-        <router-link class="mdl-navigation__link" to="/examples" @click.native="hideMenu">List Examples</router-link>
-        <router-link class="mdl-navigation__link" to="/examples/post" @click.native="hideMenu">Post an Example</router-link>
-      </nav>
-    </div>
-    <main class="mdl-layout__content">
-      <div class="page-content">
+<v-app id="foundirl">
+    <v-navigation-drawer
+      app
+      fixed
+      v-model="drawer"
+      light
+    >
+      <v-list>
+        <v-list-tile
+          v-for="item in menuItems"
+          :key="item.title"
+          exact
+          :to="item.link">
+          <v-list-tile-action>
+            <v-icon>{{ item.icon }}</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>{{ item.title }}</v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile
+          v-if="userIsAuthenticated"
+          @click="onLogout">
+          <v-list-tile-action>
+            <v-icon>exit_to_app</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>Logout</v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+    </v-navigation-drawer>
+    <v-toolbar app dark color="primary">
+      <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
+      <v-toolbar-title>
+        Chive
+      </v-toolbar-title>
+     </v-toolbar>
+      <v-content>
+        <v-fab-transition>
+          <v-btn fab color="accent" 
+            bottom right fixed small
+            @click="jump('/examples/post')">
+            <v-icon dark>add</v-icon>
+          </v-btn>
+        </v-fab-transition>
         <router-view></router-view>
-      </div>
-    </main>
-  </div>
+      </v-content>
+  </v-app>
 </template>
 
 <script>
-require('material-design-lite')
-
 export default {
   name: 'app',
+  data() {
+    return {
+      drawer: false
+    }
+  },
+  computed: {
+    userIsAuthenticated() {
+      // This is where you would have some code to determine if the user is logged in
+      return false
+    },
+    menuItems() {
+      let menuItems = [
+        { icon: 'home', title: 'Home', link: '/' },
+        { icon: 'format_list_numbered', title: 'List Examples', link: '/examples' },
+        { icon: 'add_circle', title: 'Post an Example', link: '/examples/post' }
+        // { icon: 'lock_open', title: 'Sign in', link: '/signin' },
+      ]
+      if (this.userIsAuthenticated) {
+        menuItems = [
+          { icon: 'home', title: 'Home', link: '/' },
+          { icon: 'format_list_numbered', title: 'List Examples', link: '/examples' },
+          { icon: 'add_circle', title: 'Post an Example', link: '/examples/post' },
+          { icon: 'account_circle', title: 'My Profile', link: '/profile' }
+        ]
+      }
+      return menuItems
+    }
+  },
   methods: {
-    hideMenu: function () {
-      document.getElementsByClassName('mdl-layout__drawer')[0].classList.remove('is-visible')
-      document.getElementsByClassName('mdl-layout__obfuscator')[0].classList.remove('is-visible')
+    jump(loc) {
+      this.$router.push(loc)
     }
   }
 }
 </script>
 
-<style>
-  @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
-  @import url('https://code.getmdl.io/1.3.0/material.green-amber.min.css');
+<style lang="stylus">
+$color-pack = false;
+
+/* * local loading of material icons and roboto font */
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url('https://fonts.gstatic.com/s/materialicons/v29/2fcrYFNaTjcS6g4U3t-Y5StnKWgpfO2iSkLzTz-AABg.ttf'); // fonts.gstatic.com/s/materialicons/v29/2fcrYFNaTjcS6g4U3t-Y5StnKWgpfO2iSkLzTz-AABg.ttf)
+  format('truetype');
+}
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Roboto Light'), local('Roboto-Light'), url('https://fonts.gstatic.com/s/roboto/v16/Hgo13k-tfSpn0qi1SFdUfaCWcynf_cDxXwCLxiixG1c.ttf');
+  format('truetype');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto'), local('Roboto-Regular'), url('https://fonts.gstatic.com/s/roboto/v16/zN7GBFwfMP4uA6AR0HCoLQ.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  src: local('Roboto Medium'), local('Roboto-Medium'), url('https://fonts.gstatic.com/s/roboto/v16/RxZJdnzeo3R5zSexge8UUaCWcynf_cDxXwCLxiixG1c.ttf');
+  format('truetype');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Bold'), local('Roboto-Bold'), url('https://fonts.gstatic.com/s/roboto/v16/d-6IYplOFocCacKzxwXSOKCWcynf_cDxXwCLxiixG1c.ttf');
+  format('truetype');
+}
 </style>

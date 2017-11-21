@@ -1,0 +1,14 @@
+{
+  // This is used by the vetur extension for vue files
+  "include": ["./src/**/*"],
+  "exclude": ["./src/build/*", "./src/config/*"],
+  "compilerOptions": {
+    "module": "es2015",
+    "target": "es5",
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@": ["./src/**/*"]
+    }
+  }
+}
